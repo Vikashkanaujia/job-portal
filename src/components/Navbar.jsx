@@ -19,7 +19,7 @@ const Navbar = () => {
             
             <a href='/' className='flex items-center gap-2 text-2xl text-black'> 
                 <svg 
-                        xmLns= "http://www.w3.org/2000/svg"
+                        xmlns= "http://www.w3.org/2000/svg"
                         width="29"
                         height="30"
                         viewBox=" 0 0 29 30"

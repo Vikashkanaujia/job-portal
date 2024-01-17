@@ -3,70 +3,103 @@ import { useState } from "react";
 import Banner from "../components/Banner";
 import Jobs from "../components/Jobs";
 import Card from "../components/Card";
+import Sidebar from "../sidebar/Sidebar";
 const Home = () => {
-  const [selectedCategory , setSelectedCategory] = useState(null)
-  const [jobs , setJobs] = useState([]);
-
-  useEffect(()=>{
-    fetch("jobs.json").then(res =>res.json()).then(data=>{
-      
-      setJobs(data)
-    })
-  },[])
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [jobs, setJobs] = useState([]);
+  const [isLoading , setIsLoading] = useState(true);
+  const [currentPage ,setCorrentPage] = useState(1);
+  const itemsPerPage = 6;
+  useEffect(() => {
+    setIsLoading(true);
+    fetch("jobs.json")
+      .then((res) => res.json())
+      .then((data) => {
+        setJobs(data);
+        setIsLoading(false);
+      });
+  }, []);
   const [query, setQuery] = useState("");
   const handleInputChange = (e) => {
     setQuery(e.target.value);
   };
 
   //Filter job by title
-  const filteredItems = jobs.filter((job)=> job.jobTitle.toLowerCase().indexOf(query.toLowerCase())!== -1);
+  const filteredItems = jobs.filter(
+    (job) => job.jobTitle.toLowerCase().indexOf(query.toLowerCase()) !== -1
+  );
 
   // <---------------- Radio based button filtering ----------
+console.log(selectedCategory);
+  const handleChange = (event) => {
+    setSelectedCategory(event.target.value);
 
-  const handleChange = (event)=>{
-    setSelectedCategory(event.target.value)
-  }
-  
-  
-  const handleClick = (event)=>{
-    setSelectedCategory(event.target.value)
-  }
+  };
+// <-----button based filtering ---------->
+  const handleClick = (event) => {
+    setSelectedCategory(event.target.value);
+  };
 
   // main function
 
-  const filterData = (jobs,selected,query)=>{
+  const filterData = (jobs, selected, query) => {
     let filleredJobs = jobs;
-
-    if(query){
-      filleredJobs = filteredItems
+    // console.log(jobs);
+// <------------------filtering input items------------>
+    if (query) {
+      filleredJobs = filteredItems;
     }
-    if(selected){
-      filleredJobs = filleredJobs.folter(({jobLocation,maxPrice,experienceLevel,salaryType,employmentType,postingDate})=>{
-        jobLocation.toLowerCase() === selected.toLowerCase() || parseInt(maxPrice) <= parseInt(selected) ||
-        salaryType.toLowerCase() === selected.toLowerCase ||
-        employmentType.toLowerCase() === selected.toLowerCase()
-
-
-      })
+    // <-------------category filtering---------------->
+    // console.log(selected);
+    if (selected) {
+      filleredJobs = filleredJobs.filter(
+        ({
+          jobLocation,
+          maxPrice,
+          experienceLevel,
+          salaryType,
+          employmentType,
+          postingDate,
+        }) => 
+           (
+          jobLocation.toLowerCase() === selected.toLowerCase()||
+            parseInt(maxPrice) <= parseInt(selected) ||
+            salaryType.toLowerCase() === selected.toLowerCase() ||
+            employmentType.toLowerCase() === selected.toLowerCase()
+          )
+        
+      );
+      
     }
+    console.log(filleredJobs);
 
-    return filleredJobs.map((data , i)=>{
-      return <Card key={i} data ={data} />
-    })
-  }
+    return filleredJobs.map((data, i) => {
+      return <Card key={i} data={data} />;
+    });
+  };
 
-  const result = filterData(jobs,selectedCategory,query);
+  const result = filterData(jobs, selectedCategory, query);
 
-
- 
   return (
     <div>
-      <Banner query={query} handleInputChange={ handleInputChange}/>
+      <Banner query={query} handleInputChange={handleInputChange} />
       {/* Main content  */}
       <div className="bg-[#FAFAFA] md:grid grid-cols-4 gap-8 lg:px-24 px-4 py-12">
-        <div className="bg-white p-4 rounded">Left </div>
-        <div className="col-span-2 bg-white p-4 rounded"><Jobs result = {result}/></div>
-        
+        <div className="bg-white p-4 rounded">
+          <Sidebar handleChange={handleChange} handleClick={handleClick} />
+        </div>
+        {/* Job cards */}
+        <div className="col-span-2 bg-white p-4 rounded">
+        {
+          isLoading ? (<p>Loading....</p>) : result.length > 0 ? <Jobs result={result} /> :<>
+          <h3>{result.length} Jobs</h3>
+          <p>No data found</p>
+          </>
+          
+        }
+          
+        </div>
+        {/* Right side */}
         <div className="bg-white p-4 rounded">Right</div>
       </div>
     </div>
