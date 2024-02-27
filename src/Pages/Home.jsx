@@ -4,12 +4,13 @@ import Banner from "../components/Banner";
 import Jobs from "../components/Jobs";
 import Card from "../components/Card";
 import Sidebar from "../sidebar/Sidebar";
+import Newsletter from "../components/Newsletter";
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCorrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -82,9 +83,12 @@ const Home = () => {
           employmentType,
           postingDate,
         }) =>
+        // postingDate >= selected
           jobLocation.toLowerCase() === selected.toLowerCase() ||
           parseInt(maxPrice) <= parseInt(selected) ||
+          postingDate >= selected ||
           salaryType.toLowerCase() === selected.toLowerCase() ||
+          experienceLevel.toLowerCase() === selected.toLowerCase() ||
           employmentType.toLowerCase() === selected.toLowerCase()
       );
     }
@@ -110,7 +114,7 @@ const Home = () => {
           <Sidebar handleChange={handleChange} handleClick={handleClick} />
         </div>
         {/* Job cards */}
-        <div className="col-span-2 bg-white p-4 rounded-sm ">
+         <div className="col-span-2 bg-white p-4 rounded-sm ">
           {isLoading ? (
             <p className="font-medium">Loading....</p>
           ) : result.length > 0 ? (
@@ -120,10 +124,21 @@ const Home = () => {
               <h3 className="text-lg font-bold mb-2">{result.length} Jobs</h3>
               <p>No data found!</p>
             </>
-          )}
+          )
+        }
+        {
+          result.length > 0 ? (
+            <div className = "flex justify-center mt-4 space-x-8">
+            <button onClick = {prevPage} disabled={currentPage === 1} className="hover:underline">Previous</button>
+            <span className="mx-2">Page {currentPage} of {Math.ceil(filteredItems.length / itemsPerPage)}</span>
+            <button onClick = {nextPage} disabled = {currentPage === Math.ceil(filteredItems.length /itemsPerPage )}
+             className="hover:underline">Next</button>
+            </div>
+          ) : ""
+        }
         </div>
         {/* Right side */}
-        <div className="bg-white p-4 rounded">Right</div>
+        <div className="bg-white p-4 rounded"><Newsletter/></div>
       </div>
     </div>
   );
